@@ -31,6 +31,7 @@ import {
   faPlus,
   faTimes,
   faSearchMinus,
+  faPlusCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import _ from 'lodash';
 import toast, { Toaster } from 'react-hot-toast';
@@ -39,7 +40,7 @@ import { useDebounce } from 'use-debounce/lib';
 import moment from 'moment';
 import { useIsMount } from './utils/hooks/useIsMount';
 
-interface Props<
+export interface Props<
   T extends Record<
     string,
     {
@@ -52,11 +53,16 @@ interface Props<
   getApi: AdminTableGetApi<{
     [P in keyof T]: T[P] extends ContainerBase<infer U> ? U : any;
   }>;
+  postApi?: (data: {
+    data: Record<string, any>;
+  }) => Promise<{ result: boolean; message?: string }>;
   patchApi?: (data: {
     data: Record<string, any>;
     docId: string;
-  }) => Promise<{ result: boolean }>;
-  deleteApi?: (data: { docId: string }) => Promise<{ result: boolean }>;
+  }) => Promise<{ result: boolean; message?: string }>;
+  deleteApi?: (data: {
+    docId: string;
+  }) => Promise<{ result: boolean; message?: string }>;
   title?: string;
   colorSettings?: { keyColor: string; backgroundColor: string };
 }
@@ -96,6 +102,7 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
 
   const [modifyIdx, setModifyIdx] = useState(-1);
   const [deleteIdx, setDeleteIdx] = useState(-1);
+  const [isCreateEnabled, setIsCreateEnabled] = useState(false);
   const [modalFormData, setModalFormData] = useState<Record<string, any>>({});
   const [debouncedModalFormData] = useDebounce(modalFormData, 500);
 
@@ -269,6 +276,16 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
                 <Option key={`PickListOption_${v}`} name={v} label={v} />
               ))}
             </Picklist>
+            <Margin horizontal={'20px'} />
+            <Button
+              variant={'base'}
+              style={{ marginBottom: '2px', width: '40px', height: '40px' }}
+              onClick={() => setIsCreateEnabled(true)}>
+              <FontAwesomeIcon
+                icon={faPlusCircle}
+                color={colorSettings.keyColor}
+              />
+            </Button>
             <Margin horizontal={'20px'} />
             <Button
               variant={'base'}
@@ -522,9 +539,17 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
                 props.patchApi &&
                   props
                     .patchApi({ data: dat, docId: modalFormData._id })
-                    .then(() => {
-                      setModifyIdx(-1);
-                      toast.success('Saved successfully!');
+                    .then((v) => {
+                      if (v.result) {
+                        setModifyIdx(-1);
+                        toast.success('Modified successfully!');
+                      } else {
+                        toast.error(
+                          `Failed to modify document${
+                            v.message ? ` - ${v.message}` : ''
+                          }`,
+                        );
+                      }
                     });
               }}>
               Save
@@ -579,7 +604,7 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
               </Table>
             )}
           </Flex>
-          <FlexSpacer flex={1} />
+          <div style={{ flex: 1, minHeight: '20px' }} />
           <Flex horizontal>
             <Button
               variant={'border'}
@@ -596,14 +621,139 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
                 props.deleteApi &&
                   props
                     .deleteApi({ docId: data?.data?.[deleteIdx]._id })
-                    .then(() => {
-                      setDeleteIdx(-1);
+                    .then((v) => {
+                      if (v.result) {
+                        setDeleteIdx(-1);
+                        toast.success('Deleted successfully!');
+                      } else {
+                        toast.error(
+                          `Failed to delete document${
+                            v.message ? ` - ${v.message}` : ''
+                          }`,
+                        );
+                      }
                     });
               }}>
               Delete
             </Button>
             <Margin horizontal={'20px'} />
             <Button variant={'border'} onClick={() => setDeleteIdx(-1)}>
+              Cancel
+            </Button>
+          </Flex>
+
+          <FlexSpacer flex={0.5} />
+        </Flex>
+      </ReactModal>
+      <ReactModal
+        isOpen={isCreateEnabled}
+        onRequestClose={() => setIsCreateEnabled(false)}
+        onAfterOpen={() => {
+          const createFormStack: Record<string, any> = {};
+          Object.entries(data?.data?.[modifyIdx] || {}).forEach(
+            ([key, value]) => {
+              if (props.contents[key]?.pref?.containerType === 'datetime') {
+                createFormStack[key] = moment(value + '+00:00')
+                  .local()
+                  .format('YYYY-MM-DD[T]HH:mm:ss');
+              } else {
+                createFormStack[key] = value;
+              }
+            },
+          );
+          setModalFormData(createFormStack);
+        }}
+        closeTimeoutMS={200}
+        ariaHideApp={false}>
+        <Flex vertical fitParent>
+          <Flex vertical flex={9} width={'100%'}>
+            <Text fontSize="24px">
+              <Color.key>Modification</Color.key>
+            </Text>
+            <Margin vertical={'50px'} />
+            {Object.entries(modalFormData).map(([key, value]) => {
+              if (props.contents[key]?.pref?.editable === false) {
+                return;
+              }
+              if (!props.contents[key]) return;
+              return (
+                <Flex
+                  horizontal
+                  key={`AdminTable_reactmodal_iter_${key}`}
+                  width={'100%'}
+                  style={{ marginTop: '20px', alignItems: 'flex-start' }}>
+                  <FlexSpacer flex={1} />
+                  <Flex width={'100px'} style={{ marginTop: '8px' }}>
+                    <Color.key>{props.contents[key]?.pref?.title}</Color.key>
+                  </Flex>
+                  <Flex flex={20}>
+                    {props.contents[key].func({
+                      value,
+                      isChanging: true,
+                      error: modifyError[key],
+                      onChange: (e: any) => {
+                        setModalFormData({
+                          ...modalFormData,
+                          [key]: e.target.value,
+                        });
+                      },
+                    })}
+                  </Flex>
+                  <FlexSpacer flex={1} />
+                </Flex>
+              );
+            })}
+          </Flex>
+          <FlexSpacer flex={1} />
+          <Flex horizontal>
+            <Button
+              variant={'border'}
+              onClick={() => {
+                if (Object.keys(modifyError).length) {
+                  toast.error('Failed to save! Some values are invalid.');
+                  return;
+                }
+
+                const dat: Record<string, any> = {};
+
+                const whitelistKeys = Object.keys(props.contents);
+                Object.entries(modalFormData).forEach(([k, v]) => {
+                  if (whitelistKeys.indexOf(k) !== -1) {
+                    if (props.contents[k].pref.containerType === 'datetime') {
+                      dat[k] = moment
+                        .utc(moment(v))
+                        .format('YYYY-MM-DD[T]HH:mm:ss');
+                    } else if (
+                      props.contents[k].pref.containerType === 'number'
+                    ) {
+                      dat[k] = parseFloat(v);
+                    } else {
+                      dat[k] = v;
+                    }
+                  }
+                });
+
+                // eslint-disable-next-line no-unused-expressions
+                props.postApi &&
+                  props.postApi({ data: dat }).then((v) => {
+                    if (v.result) {
+                      setModifyIdx(-1);
+                      toast.success('Created successfully!');
+                    } else {
+                      toast.error(
+                        `Failed to create document${
+                          v.message ? ` - ${v.message}` : ''
+                        }`,
+                      );
+                    }
+                  });
+              }}>
+              Save
+            </Button>
+            <Margin horizontal={'20px'} />
+            <Button
+              variant={'border'}
+              onClick={() => setIsCreateEnabled(false)}>
               Cancel
             </Button>
           </Flex>

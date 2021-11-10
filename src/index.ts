@@ -5,6 +5,7 @@ import EnumContainer from './components/Enum';
 import MarkdownContainer from './components/Markdown';
 import NumberContainer from './components/Number';
 import StringContainer from './components/String';
+import _AdminTable, { Props as AdminTableProps } from './AdminTable';
 
 export type ContainerBase<T> = PreferencesContainerBase &
   ExclusiveContainerBase<T>;
@@ -79,3 +80,20 @@ export const DataTypes = {
   number: containerFactory(NumberContainer, 'number'),
   markdown: containerFactory(MarkdownContainer, 'markdown'),
 };
+
+export const AdminTable = _AdminTable;
+
+export type AdminTablePatchApi = Exclude<
+  AdminTableProps<any>['patchApi'],
+  undefined
+>;
+
+export type AdminTableDeleteApi = Exclude<
+  AdminTableProps<any>['deleteApi'],
+  undefined
+>;
+
+export type AdminTablePostApi = Exclude<
+  AdminTableProps<any>['postApi'],
+  undefined
+>;
