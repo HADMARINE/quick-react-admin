@@ -164,7 +164,7 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
     return () => {
       return;
     };
-  }, [modifyIdx, deleteIdx]);
+  }, [modifyIdx, deleteIdx, isCreateEnabled]);
 
   useEffect(() => {
     apiRequest();
@@ -277,16 +277,20 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
               ))}
             </Picklist>
             <Margin horizontal={'20px'} />
-            <Button
-              variant={'base'}
-              style={{ marginBottom: '2px', width: '40px', height: '40px' }}
-              onClick={() => setIsCreateEnabled(true)}>
-              <FontAwesomeIcon
-                icon={faPlusCircle}
-                color={colorSettings.keyColor}
-              />
-            </Button>
-            <Margin horizontal={'20px'} />
+            {props.postApi && (
+              <>
+                <Button
+                  variant={'base'}
+                  style={{ marginBottom: '2px', width: '40px', height: '40px' }}
+                  onClick={() => setIsCreateEnabled(true)}>
+                  <FontAwesomeIcon
+                    icon={faPlusCircle}
+                    color={colorSettings.keyColor}
+                  />
+                </Button>
+                <Margin horizontal={'20px'} />
+              </>
+            )}
             <Button
               variant={'base'}
               style={{ marginBottom: '2px', width: '40px', height: '40px' }}
@@ -650,17 +654,15 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
         onRequestClose={() => setIsCreateEnabled(false)}
         onAfterOpen={() => {
           const createFormStack: Record<string, any> = {};
-          Object.entries(data?.data?.[modifyIdx] || {}).forEach(
-            ([key, value]) => {
-              if (props.contents[key]?.pref?.containerType === 'datetime') {
-                createFormStack[key] = moment(value + '+00:00')
-                  .local()
-                  .format('YYYY-MM-DD[T]HH:mm:ss');
-              } else {
-                createFormStack[key] = value;
-              }
-            },
-          );
+          Object.entries(props.contents || {}).forEach(([key, _value]) => {
+            if (props.contents[key]?.pref?.containerType === 'datetime') {
+              createFormStack[key] = moment(0)
+                .local()
+                .format('YYYY-MM-DD[T]HH:mm:ss');
+            } else {
+              createFormStack[key] = '';
+            }
+          });
           setModalFormData(createFormStack);
         }}
         closeTimeoutMS={200}
@@ -737,7 +739,7 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
                 props.postApi &&
                   props.postApi({ data: dat }).then((v) => {
                     if (v.result) {
-                      setModifyIdx(-1);
+                      setIsCreateEnabled(false);
                       toast.success('Created successfully!');
                     } else {
                       toast.error(
