@@ -6,14 +6,14 @@ import moment from 'moment';
 
 type Props = ContainerBase<Date>;
 
-const DateTimeContainer = (props: Props) => {
+const DateContainer = (props: Props) => {
   return props.isChanging ? (
     <Flex width={'70%'} horizontal flex={1}>
       <Input
         onChange={(e) => {
           e.target.value = moment(e.target.value)
             .local()
-            .format('YYYY-MM-DD[T]HH:mm:ss');
+            .format('YYYY-MM-DD[T]');
           props.onChange(e);
         }}
         // value={moment(props.value).local().format('YYYY-MM-DD[T]HH:mm:ss')}
@@ -21,7 +21,7 @@ const DateTimeContainer = (props: Props) => {
         variant={'default'}
         style={{ flex: 1 }}
         error={props.error || undefined}
-        type={'date'}
+        type={'datetime-local'}
       />
     </Flex>
   ) : (
@@ -35,11 +35,11 @@ const DateTimeContainer = (props: Props) => {
             v.value[v.value.length - 1] === 'Z' ? v.value : v.value + '+00:00',
           )
             .local()
-            .format('YYYY-MM-DD')}
+            .format('YYYY-MM-DD HH:mm:ss [(Local Time)]')}
         </>
       )}
     />
   );
 };
 
-export default DateTimeContainer;
+export default DateContainer;

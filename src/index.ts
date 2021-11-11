@@ -5,6 +5,7 @@ import EnumContainer from './components/Enum';
 import MarkdownContainer from './components/Markdown';
 import NumberContainer from './components/Number';
 import StringContainer from './components/String';
+import DateContainer from './components/Date';
 import _AdminTable, { Props as AdminTableProps } from './AdminTable';
 
 export type ContainerBase<T> = PreferencesContainerBase &
@@ -31,6 +32,7 @@ export type ContainerTypes =
   | 'string'
   | 'enum'
   | 'datetime'
+  | 'date'
   | 'number'
   | 'markdown';
 
@@ -77,6 +79,7 @@ export const DataTypes = {
   string: containerFactory(StringContainer, 'string'),
   enum: containerFactory(EnumContainer, 'enum'),
   dateTime: containerFactory(DateTimeContainer, 'datetime'),
+  date: containerFactory(DateContainer, 'date'),
   number: containerFactory(NumberContainer, 'number'),
   markdown: containerFactory(MarkdownContainer, 'markdown'),
 };

@@ -147,7 +147,12 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
       }
       getApiProps.query = finalQuery;
     }
-    setData(await props.getApi(getApiProps));
+
+    const res = await props.getApi(getApiProps);
+    if (!res.result) {
+      toast.error('Failed to fetch data');
+    }
+    setData(res);
     setIsLoading(false);
   };
 
