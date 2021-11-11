@@ -464,9 +464,11 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
           [...Object.keys(props.contents || {}), '_id'].forEach((key) => {
             const value = data?.data?.[modifyIdx][key];
             if (props.contents[key]?.pref?.containerType === 'datetime') {
-              modifyFormStack[key] = moment(value + '+00:00')
+              modifyFormStack[key] = moment(value)
                 .local()
                 .format('YYYY-MM-DD[T]HH:mm:ss');
+            } else if (props.contents[key]?.pref?.containerType === 'date') {
+              modifyFormStack[key] = moment(value).local().format('YYYY-MM-DD');
             } else {
               modifyFormStack[key] = value;
             }

@@ -21,7 +21,7 @@ const DateTimeContainer = (props: Props) => {
         variant={'default'}
         style={{ flex: 1 }}
         error={props.error || undefined}
-        type={'date'}
+        type={'datetime-local'}
       />
     </Flex>
   ) : (
@@ -35,7 +35,7 @@ const DateTimeContainer = (props: Props) => {
             v.value[v.value.length - 1] === 'Z' ? v.value : v.value + '+00:00',
           )
             .local()
-            .format('YYYY-MM-DD')}
+            .format('YYYY-MM-DD HH:mm:ss [(Local Time)]')}
         </>
       )}
     />

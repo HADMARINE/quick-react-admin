@@ -11,9 +11,7 @@ const DateContainer = (props: Props) => {
     <Flex width={'70%'} horizontal flex={1}>
       <Input
         onChange={(e) => {
-          e.target.value = moment(e.target.value)
-            .local()
-            .format('YYYY-MM-DD[T]');
+          e.target.value = moment(e.target.value).local().format('YYYY-MM-DD');
           props.onChange(e);
         }}
         // value={moment(props.value).local().format('YYYY-MM-DD[T]HH:mm:ss')}
@@ -21,7 +19,7 @@ const DateContainer = (props: Props) => {
         variant={'default'}
         style={{ flex: 1 }}
         error={props.error || undefined}
-        type={'datetime-local'}
+        type={'date'}
       />
     </Flex>
   ) : (
@@ -35,7 +33,7 @@ const DateContainer = (props: Props) => {
             v.value[v.value.length - 1] === 'Z' ? v.value : v.value + '+00:00',
           )
             .local()
-            .format('YYYY-MM-DD HH:mm:ss [(Local Time)]')}
+            .format('YYYY-MM-DD')}
         </>
       )}
     />
