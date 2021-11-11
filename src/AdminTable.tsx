@@ -456,17 +456,16 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
         }}
         onAfterOpen={() => {
           const modifyFormStack: Record<string, any> = {};
-          Object.entries(data?.data?.[modifyIdx] || {}).forEach(
-            ([key, value]) => {
-              if (props.contents[key]?.pref?.containerType === 'datetime') {
-                modifyFormStack[key] = moment(value + '+00:00')
-                  .local()
-                  .format('YYYY-MM-DD[T]HH:mm:ss');
-              } else {
-                modifyFormStack[key] = value;
-              }
-            },
-          );
+          [...Object.keys(props.contents || {}), '_id'].forEach((key) => {
+            const value = data?.data?.[modifyIdx][key];
+            if (props.contents[key]?.pref?.containerType === 'datetime') {
+              modifyFormStack[key] = moment(value + '+00:00')
+                .local()
+                .format('YYYY-MM-DD[T]HH:mm:ss');
+            } else {
+              modifyFormStack[key] = value;
+            }
+          });
           setModalFormData(modifyFormStack);
         }}
         closeTimeoutMS={200}
@@ -670,7 +669,7 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
         <Flex vertical fitParent>
           <Flex vertical flex={9} width={'100%'}>
             <Text fontSize="24px">
-              <Color.key>Modification</Color.key>
+              <Color.key>Creation</Color.key>
             </Text>
             <Margin vertical={'50px'} />
             {Object.entries(modalFormData).map(([key, value]) => {
@@ -732,6 +731,8 @@ const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
                     } else {
                       dat[k] = v;
                     }
+                  } else {
+                    dat[k] = '';
                   }
                 });
 
