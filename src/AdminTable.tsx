@@ -36,7 +36,7 @@ import {
 import _ from 'lodash';
 import toast, { Toaster } from 'react-hot-toast';
 import { Portal } from 'react-portal';
-import { useDebounce } from 'use-debounce/lib';
+import { useDebounce } from 'use-debounce';
 import moment from 'moment';
 import { useIsMount } from './utils/hooks/useIsMount';
 
@@ -90,7 +90,7 @@ const getVacantKey = (
 
 const limitHistory = [0, 0];
 
-const _AdminTable = function <T extends Record<string, any>>(props: Props<T>) {
+const _AdminTable = <T extends Record<string, any>>(props: Props<T>) => {
   const isMount = useIsMount();
 
   const [data, setData] = useState<ApiType>();

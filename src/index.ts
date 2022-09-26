@@ -65,10 +65,10 @@ export function containerFactory<T>(
   type: ContainerTypes,
 ) {
   type CType = T extends ContainerBase<any> ? T['value'] : any;
-  return (pref: Omit<T, keyof ExclusiveContainerBase<CType>>) => {
+  return (pref?: Omit<T, keyof ExclusiveContainerBase<CType>>) => {
     return {
       func: (ctrl: ExclusiveContainerBase<CType>) => {
-        return container(Object.assign(pref, ctrl) as any);
+        return container(Object.assign(pref || {}, ctrl) as any);
       },
       pref: Object.assign(pref, { containerType: type }),
     };
