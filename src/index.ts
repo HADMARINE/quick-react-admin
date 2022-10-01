@@ -6,6 +6,7 @@ import MarkdownContainer from './components/Markdown';
 import NumberContainer from './components/Number';
 import StringContainer from './components/String';
 import DateContainer from './components/Date';
+import ArrayContainer from './components/Array';
 import _AdminTable, { Props as AdminTableProps } from './AdminTable';
 
 export type ContainerBase<T> = PreferencesContainerBase &
@@ -34,7 +35,8 @@ export type ContainerTypes =
   | 'datetime'
   | 'date'
   | 'number'
-  | 'markdown';
+  | 'markdown'
+  | 'array';
 
 export type AdminTableGetApi<T> = (props: {
   skip: number;
@@ -70,7 +72,7 @@ export function containerFactory<T>(
       func: (ctrl: ExclusiveContainerBase<CType>) => {
         return container(Object.assign(pref || {}, ctrl) as any);
       },
-      pref: Object.assign(pref, { containerType: type }),
+      pref: Object.assign(pref || {}, { containerType: type }),
     };
   };
 }
@@ -82,6 +84,7 @@ export const DataTypes = {
   date: containerFactory(DateContainer, 'date'),
   number: containerFactory(NumberContainer, 'number'),
   markdown: containerFactory(MarkdownContainer, 'markdown'),
+  array: containerFactory(ArrayContainer, 'array'),
 };
 
 export const AdminTable = _AdminTable;

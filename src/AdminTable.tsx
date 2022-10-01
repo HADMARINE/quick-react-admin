@@ -638,7 +638,7 @@ const _AdminTable = <T extends Record<string, any>>(props: Props<T>) => {
                       } else {
                         toast.error(
                           `Failed to delete document${
-                            v.message ? ` - ${v.message}` : ''
+                            v.message && ` - ${v.message}`
                           }`,
                         );
                       }

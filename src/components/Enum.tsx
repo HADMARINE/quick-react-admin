@@ -43,7 +43,7 @@ const EnumContainer = (props: Props) => {
       header={props.title}
       field={props.key}
       component={StatusBadge}
-      sortable={props.sortable || true}
+      sortable={props.sortable || false}
     />
   );
 };
